@@ -20,7 +20,10 @@ try {
   consumer.on('message', async function (message) {
     let temp = JSON.parse(message.value);
     // console.log(temp);
-
+    let timeoutTime=100;
+    if(temp.message==`timeout1`){
+      timeoutTime = 1000;
+    }
     setTimeout(() => {
 
       switch (temp.state) {
@@ -65,7 +68,7 @@ try {
           break;
       }
 
-    }, 100);
+    }, timeoutTime);
 
     // consumer.commitOffsets(true);
   })

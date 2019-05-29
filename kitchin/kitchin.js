@@ -18,8 +18,13 @@ try {
   );
 
   consumer.on('message', async function (message) {
+    let timeoutTime =100;
+    let temp = JSON.parse(message.value);
+    if(temp.message == `timeout2`){
+      timeoutTime=1000;
+    }
+
     setTimeout(() => {
-      let temp = JSON.parse(message.value);
       switch (temp.state) {
         case 'create-ticket':
           temp.state = `ticket created`;
@@ -64,7 +69,7 @@ try {
       // console.log(message.value);
 
 
-    }, 1000);
+    }, timeoutTime);
 
     // consumer.commitOffsets(true);
   })

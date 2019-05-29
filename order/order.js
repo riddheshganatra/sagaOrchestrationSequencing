@@ -78,7 +78,6 @@ consumer.on('message', async function (message) {
         return await productMessage(`verify-consumer`, `rollback:verifying consumer`, temp.reqID, temp.message);
 
       }
-
         // update state
         await productMessage(`create-ticket`, `create-ticket`, temp.reqID, temp.message);
       
@@ -86,6 +85,8 @@ consumer.on('message', async function (message) {
 
     case `consumer verification failed`:
       requestIds[temp.reqID].resObject.send({ message: 'consumer verification failed' })
+      clearTimeout(requestIds[temp.reqID].timeoutFunction);
+      delete requestIds[temp.reqID];
       break;
 
     case `ticket created`:
