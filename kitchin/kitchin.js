@@ -17,37 +17,61 @@ try {
     }
   );
 
-  consumer.on('message', async function(message) {
+  consumer.on('message', async function (message) {
     setTimeout(() => {
-    let temp = JSON.parse(message.value);
+      let temp = JSON.parse(message.value);
+      switch (temp.state) {
+        case 'create-ticket':
+          temp.state = `ticket created`;
 
-      // console.log(message.value);
-      temp.state=`ticket created`;
+          if (temp.message == 12) {
+            temp.state = `ticket creation failed`;
+          }
+          producer.send([
+            {
+              topic: `order-reply-channel`,
+              messages: JSON.stringify(temp)
+            }
+          ], (err, data) => {
+            if (err) {
+              console.log(err);
+            } else {
+              console.log(`success`);
+            }
+          });
+          break;
 
-      if(temp.message == 12){
-      temp.state=`ticket creation failed`;        
+        case 'rollback:create-ticket':
+          temp.state = `create-ticket rolledback`;
+
+          producer.send([
+            {
+              topic: `order-reply-channel`,
+              messages: JSON.stringify(temp)
+            }
+          ], (err, data) => {
+            if (err) {
+              console.log(err);
+            } else {
+              console.log(`success`);
+            }
+          });
+          break;
+
+        default:
+          break;
       }
-      producer.send([
-        {
-          topic: `order-reply-channel`,
-          messages: JSON.stringify(temp)
-        }
-      ], (err, data) => {
-        if (err) {
-          console.log(err);
-        } else {
-          console.log(`success`);
-        }
-      });
-      
-    }, 0);
+      // console.log(message.value);
+
+
+    }, 1000);
 
     // consumer.commitOffsets(true);
   })
-  consumer.on('error', function(err) {
+  consumer.on('error', function (err) {
     console.log('error', err);
   });
 }
-catch(e) {
+catch (e) {
   console.log(e);
 }

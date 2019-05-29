@@ -11,7 +11,6 @@ const Consumer = kafka.Consumer;
 // roll back transaction
 // timeout
 // scale
-// kakfa is down from mid way
 
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -29,11 +28,15 @@ router.get('/', async function (req, res) {
 
   try {
     requestIds[reqID] = {
-      resObject: res
+      resObject: res,
+      timeoutFunction: setTimeout(function () {
+        delete requestIds[reqID];
+        res.send(`request timeout`)
+      }, 500)
     }
 
     // verify-consumer
-    await productMessage(`verify-consumer`, `verifying consumer`, 1, reqID, req.query.message);
+    await productMessage(`verify-consumer`, `verifying consumer`, reqID, req.query.message);
 
   } catch (error) {
 
@@ -69,8 +72,16 @@ consumer.on('message', async function (message) {
 
   switch (temp.state) {
     case `consumer verified`:
-      // update state
-      await productMessage(`create-ticket`, `creating ticket`, 1, temp.reqID, temp.message);
+      //check for timeout
+      if (requestIds[temp.reqID] == undefined) {
+
+        return await productMessage(`verify-consumer`, `rollback:verifying consumer`, temp.reqID, temp.message);
+
+      }
+
+        // update state
+        await productMessage(`create-ticket`, `create-ticket`, temp.reqID, temp.message);
+      
       break;
 
     case `consumer verification failed`:
@@ -78,21 +89,34 @@ consumer.on('message', async function (message) {
       break;
 
     case `ticket created`:
+        if (requestIds[temp.reqID] == undefined) {
+          return productMessage(`create-ticket`, `rollback:create-ticket`, temp.reqID, temp.message);
+        }
       // send response back
       requestIds[temp.reqID].resObject.send({ message: temp.message })
+      clearTimeout(requestIds[temp.reqID].timeoutFunction);
       delete requestIds[temp.reqID];
       break;
 
     case `ticket creation failed`:
 
-      await productMessage(`verify-consumer`, `rollback:verifying consumer`, 1, temp.reqID, temp.message);
-
+      await productMessage(`verify-consumer`, `rollback:verifying consumer`, temp.reqID, temp.message);
 
       break;
 
     case `verifying consumer rollbacked`:
+        if (requestIds[temp.reqID] == undefined) {
+          return;
+        }
+
       requestIds[temp.reqID].resObject.send({ message: `ticket creation failed` })
+      clearTimeout(requestIds[temp.reqID].timeoutFunction);
       delete requestIds[temp.reqID];
+      break;
+
+    case `create-ticket rolledback`:
+      await productMessage(`verify-consumer`, `rollback:verifying consumer`, temp.reqID, temp.message);
+        
       break;
 
     default:
@@ -104,12 +128,12 @@ consumer.on('error', function (err) {
   console.log('error', err);
 });
 
-function productMessage(topic, state, type, reqID, message) {
+function productMessage(topic, state, reqID, message) {
   return new Promise((resolve, reject) => {
     producer.send([
       {
         topic: topic,
-        messages: JSON.stringify({ reqID: reqID, message: message, state: state, type: type })
+        messages: JSON.stringify({ reqID: reqID, message: message, state: state })
       }
     ], (err, data) => {
       if (err) {
@@ -119,7 +143,6 @@ function productMessage(topic, state, type, reqID, message) {
 
       } else {
         console.log(`${reqID}: current state: ${state}`);
-
         resolve()
         // res.json({ message: 'message success' });
       }

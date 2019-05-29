@@ -65,7 +65,7 @@ try {
           break;
       }
 
-    }, 10);
+    }, 100);
 
     // consumer.commitOffsets(true);
   })
