@@ -35,8 +35,8 @@ router.get('/', async function (req, res) {
       }, 500)
     }
 
-    // verify-consumer
-    await productMessage(`verify-consumer`, `verifying consumer`, reqID, req.query.message);
+    // consumer
+    await productMessage(`consumer`, `verifying consumer`, reqID, req.query.message);
 
   } catch (error) {
 
@@ -75,11 +75,11 @@ consumer.on('message', async function (message) {
       //check for timeout
       if (requestIds[temp.reqID] == undefined) {
 
-        return await productMessage(`verify-consumer`, `rollback:verifying consumer`, temp.reqID, temp.message);
+        return await productMessage(`consumer`, `rollback:verifying consumer`, temp.reqID, temp.message);
 
       }
         // update state
-        await productMessage(`create-ticket`, `create-ticket`, temp.reqID, temp.message);
+        await productMessage(`kitchin`, `create-ticket`, temp.reqID, temp.message);
       
       break;
 
@@ -91,7 +91,7 @@ consumer.on('message', async function (message) {
 
     case `ticket created`:
         if (requestIds[temp.reqID] == undefined) {
-          return productMessage(`create-ticket`, `rollback:create-ticket`, temp.reqID, temp.message);
+          return productMessage(`kitchin`, `rollback:create-ticket`, temp.reqID, temp.message);
         }
       // send response back
       requestIds[temp.reqID].resObject.send({ message: temp.message })
@@ -101,7 +101,7 @@ consumer.on('message', async function (message) {
 
     case `ticket creation failed`:
 
-      await productMessage(`verify-consumer`, `rollback:verifying consumer`, temp.reqID, temp.message);
+      await productMessage(`consumer`, `rollback:verifying consumer`, temp.reqID, temp.message);
 
       break;
 
@@ -116,7 +116,7 @@ consumer.on('message', async function (message) {
       break;
 
     case `create-ticket rolledback`:
-      await productMessage(`verify-consumer`, `rollback:verifying consumer`, temp.reqID, temp.message);
+      await productMessage(`consumer`, `rollback:verifying consumer`, temp.reqID, temp.message);
         
       break;
 

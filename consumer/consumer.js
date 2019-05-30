@@ -7,7 +7,7 @@ try {
   const producer = new Producer(client);
   let consumer = new Consumer(
     client,
-    [{ topic: `verify-consumer`, partition: 0 }],
+    [{ topic: `consumer`, partition: 0 }],
     {
       autoCommit: true,
       fetchMaxWaitMs: 1000,

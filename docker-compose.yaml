@@ -11,6 +11,6 @@ services:
     environment:
       KAFKA_ADVERTISED_HOST_NAME: localhost
       KAFKA_ZOOKEEPER_CONNECT: zookeeper:2181
-      KAFKA_CREATE_TOPICS: "order-reply-channel:1:1,verify-consumer:1:1,create-ticket:1:1"
+      KAFKA_CREATE_TOPICS: "order-reply-channel:1:1,consumer:1:1,kitchin:1:1"
     volumes:
       - /Users/riddheshganatra/Desktop/riddhesh/myglamm/microservices/kafkavolume:/var/run/docker.sock

@@ -7,7 +7,7 @@ try {
   const producer = new Producer(client);
   let consumer = new Consumer(
     client,
-    [{ topic: `create-ticket`, partition: 0 }],
+    [{ topic: `kitchin`, partition: 0 }],
     {
       autoCommit: true,
       fetchMaxWaitMs: 1000,
