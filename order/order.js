@@ -5,12 +5,12 @@ const kafka = require('kafka-node');
 var uuid = require('node-uuid');
 const Producer = kafka.Producer;
 const client = new kafka.KafkaClient(`localhost:2181`);
-const producer = new Producer(client);
+const producer = new Producer(client,{partitionerType: 2});
 const Consumer = kafka.Consumer;
 
 // roll back transaction
 // timeout
-// scale
+// scale consumers and producers
 
 
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -56,7 +56,7 @@ console.log('Magic happens on port ' + port);
 
 let consumer = new Consumer(
   client,
-  [{ topic: `order-reply-channel`, partition: 0 }],
+  [{ topic: `order-reply-channel` }],
   {
     autoCommit: true,
     fetchMaxWaitMs: 1000,
