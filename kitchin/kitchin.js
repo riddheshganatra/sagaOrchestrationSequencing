@@ -37,7 +37,7 @@ try {
 
     
     if(temp.message == `timeout2`){
-      timeoutTime=1000;
+      timeoutTime=2000;
     }
 
     setTimeout(() => {

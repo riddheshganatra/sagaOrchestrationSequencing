@@ -52,7 +52,7 @@ try {
     // console.log(temp);
     let timeoutTime=100;
     if(temp.message==`timeout1`){
-      timeoutTime = 1000;
+      timeoutTime = 2000;
     }
     setTimeout(() => {
 

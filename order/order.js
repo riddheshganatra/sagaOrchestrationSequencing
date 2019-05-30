@@ -32,7 +32,7 @@ router.get('/', async function (req, res) {
       timeoutFunction: setTimeout(function () {
         delete requestIds[reqID];
         res.send(`request timeout`)
-      }, 500)
+      }, 1000)
     }
 
     // consumer
