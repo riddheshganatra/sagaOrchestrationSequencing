@@ -46,9 +46,11 @@ try {
   })
   
   consumerGroup.on('message', async function (message) {
-    console.log(`message`);
+
     
     let temp = JSON.parse(message.value);
+    console.log(temp.message);
+    
     // console.log(temp);
     let timeoutTime=100;
     if(temp.message==`timeout1`){
